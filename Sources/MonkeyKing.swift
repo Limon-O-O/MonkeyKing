@@ -14,7 +14,6 @@ public class MonkeyKing: NSObject {
     public typealias DeliverCompletionHandler = (_ result: DeliverResult) -> Void
     public typealias OAuthCompletionHandler = (_ info: [String: Any]?, _ response: URLResponse?, _ error: Swift.Error?) -> Void
     public typealias WeChatOAuthForCodeCompletionHandler = (_ code: String?, _ error: Swift.Error?) -> Void
-    public typealias PayCompletionHandler = (_ result: Bool) -> Void
     public typealias LaunchCompletionHandler = (_ result: LaunchResult) -> Void
 
     public enum LaunchResult {
@@ -32,7 +31,6 @@ public class MonkeyKing: NSObject {
     var weChatOAuthForCodeCompletionHandler: WeChatOAuthForCodeCompletionHandler?
 
     private var deliverCompletionHandler: DeliverCompletionHandler?
-    private var payCompletionHandler: PayCompletionHandler?
     private var launchCompletionHandler: LaunchCompletionHandler?
     private var launchFromWeChatMiniAppHandler: ((String) -> Void)?
     private var openSchemeCompletionHandler: ((URL?) -> Void)?
@@ -495,7 +493,6 @@ extension MonkeyKing {
         }
 
         shared.deliverCompletionHandler = completionHandler
-        shared.payCompletionHandler = nil
         shared.oauthCompletionHandler = nil
         shared.openSchemeCompletionHandler = nil
 
@@ -930,43 +927,6 @@ extension MonkeyKing {
     }
 }
 
-// MARK: Pay
-
-extension MonkeyKing {
-
-    public enum Order {
-        case weChat(urlString: String)
-
-        public var canBeDelivered: Bool {
-            let scheme: String
-            switch self {
-            case .weChat:
-                scheme = "weixin://"
-            }
-            return shared.canOpenURL(urlString: scheme)
-        }
-    }
-
-    public class func deliver(_ order: Order, completionHandler: @escaping PayCompletionHandler) {
-        if !order.canBeDelivered {
-            completionHandler(false)
-            return
-        }
-        shared.payCompletionHandler = completionHandler
-        shared.oauthCompletionHandler = nil
-        shared.deliverCompletionHandler = nil
-        shared.openSchemeCompletionHandler = nil
-
-        switch order {
-        case .weChat(let urlString):
-            openURL(urlString: urlString) { flag in
-                if flag { return }
-                completionHandler(false)
-            }
-        }
-    }
-}
-
 // MARK: OAuth
 
 extension MonkeyKing {
@@ -986,7 +946,6 @@ extension MonkeyKing {
         }
 
         shared.oauthCompletionHandler = completionHandler
-        shared.payCompletionHandler = nil
         shared.deliverCompletionHandler = nil
         shared.openSchemeCompletionHandler = nil
 
@@ -1183,7 +1142,6 @@ extension MonkeyKing {
 
         shared.openSchemeCompletionHandler = completionHandler
         shared.deliverCompletionHandler = nil
-        shared.payCompletionHandler = nil
         shared.oauthCompletionHandler = nil
 
         let handleErrorResult: () -> Void = {
