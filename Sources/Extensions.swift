@@ -31,6 +31,12 @@ extension Set {
                     return account
                 }
             }
+        case .alipay:
+            for account in accountSet {
+                if case .alipay = account {
+                    return account
+                }
+            }
         case .twitter:
             for account in accountSet {
                 if case .twitter = account {
@@ -59,6 +65,12 @@ extension Set {
         case .weibo:
             for account in accountSet {
                 if case .weibo = account {
+                    return account
+                }
+            }
+        case .alipay:
+            for account in accountSet {
+                if case .alipay = account {
                     return account
                 }
             }
